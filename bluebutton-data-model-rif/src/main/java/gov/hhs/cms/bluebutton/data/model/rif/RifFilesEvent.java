@@ -1,31 +1,33 @@
 package gov.hhs.cms.bluebutton.data.model.rif;
 
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+
+
 /**
  * Models a RIF file event, in which a new set of RIF files have been made
  * available for processing.
  */
 public final class RifFilesEvent {
-	private final Instant timestamp;
+	// private final Instant timestamp;
+	private final DataSetManifest dataSetManifest;
 	private final List<RifFileEvent> fileEvents;
 
 	/**
 	 * Constructs a new {@link RifFilesEvent} instance.
 	 * 
-	 * @param timestamp
-	 *            the value to use for {@link #getTimestamp()}
+	 * @param dataSetManifest
+	 *            the value to use for {@link #getDataSetManifest()}
 	 * @param files
 	 *            the value to use for {@link #getFileEvents()}
 	 */
-	public RifFilesEvent(Instant timestamp, List<RifFile> files) {
-		if (timestamp == null)
+	public RifFilesEvent(DataSetManifest dataSetManifest, List<RifFile> files) {
+		if (dataSetManifest.getTimestamp() == null)
 			throw new IllegalArgumentException();
 		if (files == null)
 			throw new IllegalArgumentException();
@@ -35,7 +37,8 @@ public final class RifFilesEvent {
 			if (file == null)
 				throw new IllegalArgumentException();
 
-		this.timestamp = timestamp;
+		// this.timestamp = timestamp;
+		this.dataSetManifest = dataSetManifest;
 
 		this.fileEvents = buildFileEvents(files);
 	}
@@ -78,20 +81,29 @@ public final class RifFilesEvent {
 	/**
 	 * Constructs a new {@link RifFilesEvent} instance.
 	 * 
-	 * @param timestamp
-	 *            the value to use for {@link #getTimestamp()}
+	 * @param dataSetManifest
+	 *            the value to use for {@link #getDataSetManifest()}
 	 * @param files
 	 *            the value to use for {@link #getFileEvents()}
 	 */
-	public RifFilesEvent(Instant timestamp, RifFile... files) {
-		this(timestamp, Arrays.asList(files));
+	public RifFilesEvent(DataSetManifest dataSetManifest, RifFile... files) {
+		this(dataSetManifest, Arrays.asList(files));
 	}
 
 	/**
 	 * @return the timestamp that this event was fired at
 	 */
+	
 	public Instant getTimestamp() {
-		return timestamp;
+		return dataSetManifest.getTimestamp();
+	}
+	 
+
+	/**
+	 * @return the DataSetManifest that is with this RifFilesEvent
+	 */
+	public DataSetManifest getDataSetManifest() {
+		return dataSetManifest;
 	}
 
 	/**
@@ -107,11 +119,12 @@ public final class RifFilesEvent {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RifFilesEvent [timestamp=");
-		builder.append(DateTimeFormatter.ISO_INSTANT.format(timestamp));
+		builder.append("RifFilesEvent [dataSetManifest=");
+		builder.append(dataSetManifest);
 		builder.append(", fileEvents=");
 		builder.append(fileEvents);
 		builder.append("]");
 		return builder.toString();
 	}
+
 }
