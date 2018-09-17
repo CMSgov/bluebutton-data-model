@@ -1,9 +1,5 @@
 package gov.hhs.cms.bluebutton.data.model.rif;
 
-/**
- * Entity that stores when each RIF dataload file is loaded to the PostgreSQL database
- */
-
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
@@ -14,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 
+/**
+ * Entity that stores when each RIF dataload file is loaded to the PostgreSQL
+ * database
+ */
 @Entity
 @IdClass(RifDataloadHistory.PrimaryKey.class)
 @Table(name = "`RifDataloadHistory`")
@@ -42,12 +42,15 @@ public class RifDataloadHistory {
 	 * @param recordType
 	 * @param createUpdateTimestamp
 	 * @param sequenceId
+	 * @param dataloadFilename
 	 */
-	public RifDataloadHistory(String recordType, Timestamp createUpdateTimestamp, int sequenceId) {
+	public RifDataloadHistory(String recordType, Timestamp createUpdateTimestamp, int sequenceId,
+			String dataloadFilename) {
 		super();
 		this.recordType = recordType;
 		this.createUpdateTimestamp = createUpdateTimestamp;
 		this.sequenceId = sequenceId;
+		this.dataloadFilename = dataloadFilename;
 	}
 
 	public String getRecordType() {

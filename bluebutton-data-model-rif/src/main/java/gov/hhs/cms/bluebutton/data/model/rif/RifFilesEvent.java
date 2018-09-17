@@ -27,7 +27,7 @@ public final class RifFilesEvent {
 	 *            the value to use for {@link #getFileEvents()}
 	 */
 	public RifFilesEvent(DataSetManifest dataSetManifest, List<RifFile> files) {
-		if (dataSetManifest.getTimestamp() == null)
+		if (dataSetManifest == null)
 			throw new IllegalArgumentException();
 		if (files == null)
 			throw new IllegalArgumentException();
