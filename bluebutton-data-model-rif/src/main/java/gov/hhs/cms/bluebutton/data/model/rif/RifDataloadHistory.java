@@ -1,7 +1,7 @@
 package gov.hhs.cms.bluebutton.data.model.rif;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -25,7 +25,7 @@ public class RifDataloadHistory {
 
 	@Id
 	@Column(name = "`createUpdateTimestamp`", nullable = false)
-	private Timestamp createUpdateTimestamp;
+	private Instant createUpdateTimestamp;
 
 	@Id
 	@Column(name = "`sequenceId`", nullable = false, columnDefinition = "numeric")
@@ -44,7 +44,7 @@ public class RifDataloadHistory {
 	 * @param sequenceId
 	 * @param dataloadFilename
 	 */
-	public RifDataloadHistory(String recordType, Timestamp createUpdateTimestamp, int sequenceId,
+	public RifDataloadHistory(String recordType, Instant createUpdateTimestamp, int sequenceId,
 			String dataloadFilename) {
 		super();
 		this.recordType = recordType;
@@ -61,11 +61,11 @@ public class RifDataloadHistory {
 		this.recordType = recordType;
 	}
 
-	public Timestamp getCreateUpdateTimestamp() {
+	public Instant getCreateUpdateTimestamp() {
 		return createUpdateTimestamp;
 	}
 
-	public void setCreateUpdateTimestamp(Timestamp createUpdateTimestamp) {
+	public void setCreateUpdateTimestamp(Instant createUpdateTimestamp) {
 		this.createUpdateTimestamp = createUpdateTimestamp;
 	}
 
@@ -107,7 +107,7 @@ public class RifDataloadHistory {
 
 		private static final long serialVersionUID = 1;
 		private String recordType;
-		private Timestamp createUpdateTimestamp;
+		private Instant createUpdateTimestamp;
 		private int sequenceId;
 
 		public PrimaryKey() {
@@ -119,7 +119,7 @@ public class RifDataloadHistory {
 		 * @param createUpdateTimestamp
 		 * @param sequenceId
 		 */
-		public PrimaryKey(String recordType, Timestamp createUpdateTimestamp, int sequenceId) {
+		public PrimaryKey(String recordType, Instant createUpdateTimestamp, int sequenceId) {
 			super();
 			this.recordType = recordType;
 			this.createUpdateTimestamp = createUpdateTimestamp;
@@ -130,7 +130,7 @@ public class RifDataloadHistory {
 			return recordType;
 		}
 
-		public Timestamp getCreateUpdateTimestamp() {
+		public Instant getCreateUpdateTimestamp() {
 			return createUpdateTimestamp;
 		}
 
