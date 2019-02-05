@@ -1,6 +1,8 @@
 /*
  * Alters the Beneficiaries and Beneficiaries History table to add additional BSF columns 
- * 
+ *
+ * Note that none the modifications to existing tables here (just `Beneficiaries`, actually) will cause any locking/downtime for users of that table, per <https://www.postgresql.org/docs/9.6/sql-altertable.html>: "When a column is added with ADD COLUMN, all existing rows in the table are initialized with the column's default value (NULL if no DEFAULT clause is specified). If there is no DEFAULT clause, this is merely a metadata change and does not require any immediate update of the table's data; the added NULL values are supplied on readout, instead."
+ *
  * See:
  * * https://jira.cms.gov/browse/BLUEBUTTON-620
  */
