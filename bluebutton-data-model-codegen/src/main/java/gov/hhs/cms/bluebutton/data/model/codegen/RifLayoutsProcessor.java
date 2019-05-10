@@ -182,6 +182,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityIdField("beneficiaryId")
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
+					.setInnerJoinRelationship("parentBeneficiary", "beneficiaryId", "BeneficiaryHistory")
 					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
@@ -199,6 +200,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
 							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
+					.setParentRelationship("parentBeneficiary", "Beneficiary")
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -491,6 +493,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			FieldSpec headerField = FieldSpec
 					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
 					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
+
 			headerEntityClass.addField(headerField);
 
 			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
@@ -548,6 +551,51 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.addStatement("return $N", "lines").returns(childFieldType).build();
 			headerEntityClass.addMethod(childGetter);
 		}
+
+		// Create relationship for Beneficiary to BeneficiaryHistory.
+		if (mappingSpec.getHasInnerJoinRelationship()) {
+			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
+					mappingSpec.getChildEntity());
+
+			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "beneficiaryHistories", Modifier.PRIVATE)
+					.initializer("new $T<>()", LinkedList.class);
+			childField
+					.addAnnotation(AnnotationSpec.builder(OneToMany.class)
+							.addMember("mappedBy", "$S", mappingSpec.getMappedBy())
+							.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
+							.addMember("cascade", "$T.ALL", CascadeType.class).build());
+			childField.addAnnotation(AnnotationSpec.builder(OrderBy.class)
+					.addMember("value", "$S", mappingSpec.getOrderBy() + " ASC").build());
+			headerEntityClass.addField(childField.build());
+
+			MethodSpec childGetter = MethodSpec.methodBuilder("getBeneficiaryHistories").addModifiers(Modifier.PUBLIC)
+					.addStatement("return $N", "beneficiaryHistories").returns(childFieldType).build();
+			headerEntityClass.addMethod(childGetter);
+		}
+
+		if (mappingSpec.hasParentRelationship()) {
+			FieldSpec parentEntityField = FieldSpec
+					.builder(mappingSpec.getParentEntity(), mappingSpec.getJoinColumn(), Modifier.PRIVATE)
+					.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
+					.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
+							.addMember("name", "$S", "`" + mappingSpec.getJoinColumn() + "`")
+							.addMember("foreignKey", "@$T(name = $S)", ForeignKey.class, String.format("%s_%s_to_%s",
+									mappingSpec.getHeaderTable(), mappingSpec.getJoinColumn(), "Beneficiary"))
+							.build())
+					.build();
+			headerEntityClass.addField(parentEntityField);
+			MethodSpec parentEntityGetter = MethodSpec.methodBuilder(calculateGetterName(parentEntityField))
+					.addModifiers(Modifier.PUBLIC).addStatement("return $N", mappingSpec.getJoinColumn())
+					.returns(mappingSpec.getParentEntity()).build();
+			headerEntityClass.addMethod(parentEntityGetter);
+			MethodSpec.Builder parentEntitySetter = MethodSpec.methodBuilder(calculateSetterName(parentEntityField))
+					.addModifiers(Modifier.PUBLIC).returns(void.class)
+					.addParameter(mappingSpec.getParentEntity(), parentEntityField.name);
+			addSetterStatement(false, parentEntityField, parentEntitySetter);
+			headerEntityClass.addMethod(parentEntitySetter.build());
+		}
+
+
 
 		TypeSpec headerEntityFinal = headerEntityClass.build();
 		JavaFile headerEntityFile = JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
