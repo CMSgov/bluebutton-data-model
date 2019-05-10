@@ -43,6 +43,13 @@ public final class MappingSpec {
 	private String lineTable;
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
+	private String mappedBy;
+	private String orderBy;
+	private boolean hasInnerJoinRelationship;
+	private String childEntity;
+	private boolean hasParentRelationship;
+	private String joinColumn;
+	private String parentEntity;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -351,5 +358,50 @@ public final class MappingSpec {
 		builder.append(lineTable);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public MappingSpec setInnerJoinRelationship(String mappedBy, String orderBy, String childEntity) {
+		this.hasInnerJoinRelationship = true;
+		this.mappedBy = mappedBy;
+		this.orderBy = orderBy;
+		this.childEntity = childEntity;
+
+		return this;
+	}
+
+	public Boolean getHasInnerJoinRelationship() {
+		return this.hasInnerJoinRelationship;
+	}
+
+	public String getMappedBy() {
+		return this.mappedBy;
+	}
+
+	public String getOrderBy() {
+		return this.orderBy;
+	}
+
+	public ClassName getChildEntity() {
+		return ClassName.get(packageName, childEntity);
+	}
+
+	public MappingSpec setParentRelationship(String joinColumn, String parentEntity) {
+		this.hasParentRelationship = true;
+		this.joinColumn = joinColumn;
+		this.parentEntity = parentEntity;
+
+		return this;
+	}
+
+	public boolean hasParentRelationship() {
+		return hasParentRelationship;
+	}
+
+	public String getJoinColumn() {
+		return joinColumn;
+	}
+
+	public ClassName getParentEntity() {
+		return ClassName.get(packageName, parentEntity);
 	}
 }
