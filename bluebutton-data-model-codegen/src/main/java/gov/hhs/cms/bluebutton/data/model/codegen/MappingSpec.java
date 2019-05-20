@@ -43,13 +43,12 @@ public final class MappingSpec {
 	private String lineTable;
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
-	private String mappedBy;
-	private String orderBy;
-	private boolean hasInnerJoinRelationship;
-	private String childEntity;
-	private boolean hasParentRelationship;
+	private boolean hasInnerJoinRelationship = false;
+	private List<List<String>> innerJoinRelationship;
+	private boolean hasParentRelationship = false;
 	private String joinColumn;
 	private String parentEntity;
+	private String childEntity;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -360,25 +359,27 @@ public final class MappingSpec {
 		return builder.toString();
 	}
 
-	public MappingSpec setInnerJoinRelationship(String mappedBy, String orderBy, String childEntity) {
-		this.hasInnerJoinRelationship = true;
-		this.mappedBy = mappedBy;
-		this.orderBy = orderBy;
-		this.childEntity = childEntity;
-
-		return this;
-	}
-
 	public Boolean getHasInnerJoinRelationship() {
 		return this.hasInnerJoinRelationship;
 	}
 
-	public String getMappedBy() {
-		return this.mappedBy;
+	/**
+	 * @param hasInnerJoinRelationship
+	 *            the new value for {@link #getHasInnerJoinRelationship()}
+	 * @return MappingSpec
+	 */
+	public MappingSpec setHasInnerJoinRelationship(Boolean hasInnerJoinRelationship) {
+		this.hasInnerJoinRelationship = hasInnerJoinRelationship;
+		return this;
 	}
 
-	public String getOrderBy() {
-		return this.orderBy;
+	public MappingSpec setInnerJoinRelationship(List<List<String>> innerJoinRelationship) {
+		this.innerJoinRelationship = innerJoinRelationship;
+		return this;
+	}
+
+	public List<List<String>> getInnerJoinRelationship() {
+		return this.innerJoinRelationship;
 	}
 
 	public ClassName getChildEntity() {
@@ -386,15 +387,23 @@ public final class MappingSpec {
 	}
 
 	public MappingSpec setParentRelationship(String joinColumn, String parentEntity) {
-		this.hasParentRelationship = true;
 		this.joinColumn = joinColumn;
 		this.parentEntity = parentEntity;
-
 		return this;
 	}
 
-	public boolean hasParentRelationship() {
+	public boolean getHasParentRelationship() {
 		return hasParentRelationship;
+	}
+
+	/**
+	 * @param hasParentRelationship
+	 *            the new value for {@link #getHasParentRelationship()}
+	 * @return MappingSpec
+	 */
+	public MappingSpec setHasParentRelationship(Boolean hasParentRelationship) {
+		this.hasParentRelationship = hasParentRelationship;
+		return this;
 	}
 
 	public String getJoinColumn() {
@@ -403,5 +412,9 @@ public final class MappingSpec {
 
 	public ClassName getParentEntity() {
 		return ClassName.get(packageName, parentEntity);
+	}
+
+	public ClassName getClassName(String entity) {
+		return ClassName.get(packageName, entity);
 	}
 }
