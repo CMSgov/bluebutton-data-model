@@ -182,7 +182,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityIdField("beneficiaryId")
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
-					.setInnerJoinRelationship("parentBeneficiary", "beneficiaryId", "BeneficiaryHistory")
+					.setHasInnerJoinRelationship(true)
+					.setInnerJoinRelationship(Arrays.asList(
+							Arrays.asList("beneHistoryParentBeneficiary", "beneficiaryId", "BeneficiaryHistory",
+									"beneficiaryHistories"),
+							Arrays.asList("mbiParentBeneficiary", "beneficiaryId", "MedicareBeneficiaryIdHistory",
+									"medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
@@ -200,12 +205,15 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
 							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
-					.setParentRelationship("parentBeneficiary", "Beneficiary")
+					.setHasParentRelationship(true)
+					.setParentRelationship("beneHistoryParentBeneficiary", "Beneficiary")
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
 					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
+					.setHasParentRelationship(true)
+					.setParentRelationship("mbiParentBeneficiary", "Beneficiary")
 					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -551,29 +559,35 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.addStatement("return $N", "lines").returns(childFieldType).build();
 			headerEntityClass.addMethod(childGetter);
 		}
-
-		// Create relationship for Beneficiary to BeneficiaryHistory.
+		
+		// TODO Comments
 		if (mappingSpec.getHasInnerJoinRelationship()) {
-			ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
-					mappingSpec.getChildEntity());
+			 for (List<String> relationship : mappingSpec.getInnerJoinRelationship()) {
+				String mappedBy = relationship.get(0);
+				String orderBy = relationship.get(1);
+				ClassName childEntity = mappingSpec.getClassName(relationship.get(2));
+				String childFieldName = relationship.get(3);
 
-			FieldSpec.Builder childField = FieldSpec.builder(childFieldType, "beneficiaryHistories", Modifier.PRIVATE)
-					.initializer("new $T<>()", LinkedList.class);
-			childField
-					.addAnnotation(AnnotationSpec.builder(OneToMany.class)
-							.addMember("mappedBy", "$S", mappingSpec.getMappedBy())
-							.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
-							.addMember("cascade", "$T.ALL", CascadeType.class).build());
-			childField.addAnnotation(AnnotationSpec.builder(OrderBy.class)
-					.addMember("value", "$S", mappingSpec.getOrderBy() + " ASC").build());
-			headerEntityClass.addField(childField.build());
+				ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
+						childEntity);
 
-			MethodSpec childGetter = MethodSpec.methodBuilder("getBeneficiaryHistories").addModifiers(Modifier.PUBLIC)
-					.addStatement("return $N", "beneficiaryHistories").returns(childFieldType).build();
-			headerEntityClass.addMethod(childGetter);
+				FieldSpec.Builder childField = FieldSpec.builder(childFieldType, childFieldName, Modifier.PRIVATE)
+						.initializer("new $T<>()", LinkedList.class);
+				childField.addAnnotation(AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", mappedBy)
+						.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
+						.addMember("cascade", "$T.ALL", CascadeType.class).build());
+				childField.addAnnotation(
+						AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + "ASC").build());
+				headerEntityClass.addField(childField.build());
+
+				MethodSpec childGetter = MethodSpec.methodBuilder("get" + capitalize(childFieldName))
+						.addModifiers(Modifier.PUBLIC).addStatement("return $N", childFieldName).returns(childFieldType)
+						.build();
+				headerEntityClass.addMethod(childGetter);
+			}
 		}
 
-		if (mappingSpec.hasParentRelationship()) {
+		if (mappingSpec.getHasParentRelationship()) {
 			FieldSpec parentEntityField = FieldSpec
 					.builder(mappingSpec.getParentEntity(), mappingSpec.getJoinColumn(), Modifier.PRIVATE)
 					.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
@@ -594,8 +608,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			addSetterStatement(false, parentEntityField, parentEntitySetter);
 			headerEntityClass.addMethod(parentEntitySetter.build());
 		}
-
-
 
 		TypeSpec headerEntityFinal = headerEntityClass.build();
 		JavaFile headerEntityFile = JavaFile.builder(mappingSpec.getPackageName(), headerEntityFinal).build();
