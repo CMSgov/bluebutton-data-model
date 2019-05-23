@@ -359,6 +359,10 @@ public final class MappingSpec {
 		return builder.toString();
 	}
 
+	/**
+	 * @return <code>true</code> if the RIF layout has an inner join relationship
+	 *         <code>false</code> if not
+	 */
 	public Boolean getHasInnerJoinRelationship() {
 		return this.hasInnerJoinRelationship;
 	}
@@ -366,32 +370,56 @@ public final class MappingSpec {
 	/**
 	 * @param hasInnerJoinRelationship
 	 *            the new value for {@link #getHasInnerJoinRelationship()}
-	 * @return MappingSpec
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
 	 */
 	public MappingSpec setHasInnerJoinRelationship(Boolean hasInnerJoinRelationship) {
 		this.hasInnerJoinRelationship = hasInnerJoinRelationship;
 		return this;
 	}
 
+	/**
+	 * @param innerJoinRelationship
+	 *            a list of {@link String} parameters defining the inner join
+	 *            relationship for the entity
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
 	public MappingSpec setInnerJoinRelationship(List<List<String>> innerJoinRelationship) {
 		this.innerJoinRelationship = innerJoinRelationship;
 		return this;
 	}
 
+	/**
+	 * @return the list of {@link #innerJoinRelationship}s
+	 */
 	public List<List<String>> getInnerJoinRelationship() {
 		return this.innerJoinRelationship;
 	}
 
+	/**
+	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a child
+	 *         of the header class
+	 */
 	public ClassName getChildEntity() {
 		return ClassName.get(packageName, childEntity);
 	}
 
+	/**
+	 * @param joinColumn
+	 *            the column to join on
+	 * @param parentEntity
+	 *            the parent entity of the current entity
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
+	 */
 	public MappingSpec setParentRelationship(String joinColumn, String parentEntity) {
 		this.joinColumn = joinColumn;
 		this.parentEntity = parentEntity;
 		return this;
 	}
 
+	/**
+	 * @return <code>true</code> if the RIF layout has a parent relationship
+	 *         <code>false</code> if not
+	 */
 	public boolean getHasParentRelationship() {
 		return hasParentRelationship;
 	}
@@ -399,21 +427,34 @@ public final class MappingSpec {
 	/**
 	 * @param hasParentRelationship
 	 *            the new value for {@link #getHasParentRelationship()}
-	 * @return MappingSpec
+	 * @return this {@link MappingSpec} instance, for call-chaining purposes
 	 */
 	public MappingSpec setHasParentRelationship(Boolean hasParentRelationship) {
 		this.hasParentRelationship = hasParentRelationship;
 		return this;
 	}
 
+	/**
+	 * @return the name of the column to join on
+	 */
 	public String getJoinColumn() {
 		return joinColumn;
 	}
 
+	/**
+	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a
+	 *         parent of the header class
+	 */
 	public ClassName getParentEntity() {
 		return ClassName.get(packageName, parentEntity);
 	}
 
+	/**
+	 * @param entity
+	 *            the {@link String} entity for which to return the
+	 *            {@link ClassName} for
+	 * @return the {@link ClassName} of the provided {@link String} entity
+	 */
 	public ClassName getClassName(String entity) {
 		return ClassName.get(packageName, entity);
 	}
