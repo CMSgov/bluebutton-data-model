@@ -182,11 +182,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityIdField("beneficiaryId")
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
-					.setHasInnerJoinRelationship(true)
 					.setInnerJoinRelationship(Arrays.asList(
-							Arrays.asList("beneHistoryParentBeneficiary", "beneficiaryId", "BeneficiaryHistory",
+							new InnerJoinRelationship("beneHistoryParentBeneficiary", "beneficiaryId",
+									"BeneficiaryHistory",
 									"beneficiaryHistories"),
-							Arrays.asList("mbiParentBeneficiary", "beneficiaryId", "MedicareBeneficiaryIdHistory",
+							new InnerJoinRelationship("mbiParentBeneficiary", "beneficiaryId",
+									"MedicareBeneficiaryIdHistory",
 									"medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
@@ -205,14 +206,12 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
 							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
-					.setHasParentRelationship(true)
 					.setParentRelationship("beneHistoryParentBeneficiary", "Beneficiary")
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
 					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
-					.setHasParentRelationship(true)
 					.setParentRelationship("mbiParentBeneficiary", "Beneficiary")
 					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
 
@@ -563,11 +562,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 		// Add the parent-to-child join field and accessor for an inner join
 		// relationship
 		if (mappingSpec.getHasInnerJoinRelationship()) {
-			 for (List<String> relationship : mappingSpec.getInnerJoinRelationship()) {
-				String mappedBy = relationship.get(0);
-				String orderBy = relationship.get(1);
-				ClassName childEntity = mappingSpec.getClassName(relationship.get(2));
-				String childFieldName = relationship.get(3);
+			for (InnerJoinRelationship relationship : mappingSpec.getInnerJoinRelationship()) {
+				String mappedBy = relationship.getMappedBy();
+				String orderBy = relationship.getOrderBy();
+				ClassName childEntity = mappingSpec.getClassName(relationship.getChildEntity());
+				String childFieldName = relationship.getChildField();
 
 				ParameterizedTypeName childFieldType = ParameterizedTypeName.get(ClassName.get(List.class),
 						childEntity);
