@@ -560,7 +560,8 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			headerEntityClass.addMethod(childGetter);
 		}
 		
-		// TODO Comments
+		// Add the parent-to-child join field and accessor for an inner join
+		// relationship
 		if (mappingSpec.getHasInnerJoinRelationship()) {
 			 for (List<String> relationship : mappingSpec.getInnerJoinRelationship()) {
 				String mappedBy = relationship.get(0);
@@ -587,6 +588,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 			}
 		}
 
+		/*
+		 * Add the child-to-parent field and accessors to the child for an inner join
+		 * relationship to "Beneficiary"
+		 */
 		if (mappingSpec.getHasParentRelationship()) {
 			FieldSpec parentEntityField = FieldSpec
 					.builder(mappingSpec.getParentEntity(), mappingSpec.getJoinColumn(), Modifier.PRIVATE)
