@@ -43,9 +43,7 @@ public final class MappingSpec {
 	private String lineTable;
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
-	private boolean hasInnerJoinRelationship = false;
-	private List<List<String>> innerJoinRelationship;
-	private boolean hasParentRelationship = false;
+	private List<InnerJoinRelationship> innerJoinRelationship;
 	private String joinColumn;
 	private String parentEntity;
 	private String childEntity;
@@ -61,6 +59,7 @@ public final class MappingSpec {
 		this.packageName = packageName;
 		this.headerEntityTransientFields = new ArrayList<>();
 		this.headerEntityAdditionalDatabaseFields = new ArrayList<RifField>();
+		this.innerJoinRelationship = new ArrayList<InnerJoinRelationship>();
 	}
 
 	/**
@@ -364,17 +363,7 @@ public final class MappingSpec {
 	 *         <code>false</code> if not
 	 */
 	public Boolean getHasInnerJoinRelationship() {
-		return this.hasInnerJoinRelationship;
-	}
-
-	/**
-	 * @param hasInnerJoinRelationship
-	 *            the new value for {@link #getHasInnerJoinRelationship()}
-	 * @return this {@link MappingSpec} instance, for call-chaining purposes
-	 */
-	public MappingSpec setHasInnerJoinRelationship(Boolean hasInnerJoinRelationship) {
-		this.hasInnerJoinRelationship = hasInnerJoinRelationship;
-		return this;
+		return this.innerJoinRelationship.size() != 0;
 	}
 
 	/**
@@ -383,7 +372,7 @@ public final class MappingSpec {
 	 *            relationship for the entity
 	 * @return this {@link MappingSpec} instance, for call-chaining purposes
 	 */
-	public MappingSpec setInnerJoinRelationship(List<List<String>> innerJoinRelationship) {
+	public MappingSpec setInnerJoinRelationship(List<InnerJoinRelationship> innerJoinRelationship) {
 		this.innerJoinRelationship = innerJoinRelationship;
 		return this;
 	}
@@ -391,7 +380,7 @@ public final class MappingSpec {
 	/**
 	 * @return the list of {@link #innerJoinRelationship}s
 	 */
-	public List<List<String>> getInnerJoinRelationship() {
+	public List<InnerJoinRelationship> getInnerJoinRelationship() {
 		return this.innerJoinRelationship;
 	}
 
@@ -417,21 +406,11 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return <code>true</code> if the RIF layout has a parent relationship
+	 * @return <code>true</code> if the RIF layout has a parentEnity and joinColumn
 	 *         <code>false</code> if not
 	 */
 	public boolean getHasParentRelationship() {
-		return hasParentRelationship;
-	}
-
-	/**
-	 * @param hasParentRelationship
-	 *            the new value for {@link #getHasParentRelationship()}
-	 * @return this {@link MappingSpec} instance, for call-chaining purposes
-	 */
-	public MappingSpec setHasParentRelationship(Boolean hasParentRelationship) {
-		this.hasParentRelationship = hasParentRelationship;
-		return this;
+		return parentEntity != null && joinColumn != null;
 	}
 
 	/**
