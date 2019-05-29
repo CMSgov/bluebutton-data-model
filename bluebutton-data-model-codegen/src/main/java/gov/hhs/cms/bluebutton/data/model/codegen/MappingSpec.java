@@ -46,7 +46,6 @@ public final class MappingSpec {
 	private List<InnerJoinRelationship> innerJoinRelationship;
 	private String joinColumn;
 	private String parentEntity;
-	private String childEntity;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -382,14 +381,6 @@ public final class MappingSpec {
 	 */
 	public List<InnerJoinRelationship> getInnerJoinRelationship() {
 		return this.innerJoinRelationship;
-	}
-
-	/**
-	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a child
-	 *         of the header class
-	 */
-	public ClassName getChildEntity() {
-		return ClassName.get(packageName, childEntity);
 	}
 
 	/**
