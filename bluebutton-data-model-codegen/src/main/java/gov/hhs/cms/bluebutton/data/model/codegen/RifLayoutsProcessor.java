@@ -184,11 +184,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
 					.setInnerJoinRelationship(Arrays.asList(
 							new InnerJoinRelationship("beneHistoryParentBeneficiary", "beneficiaryId",
-									"BeneficiaryHistory",
-									"beneficiaryHistories"),
+									"BeneficiaryHistory", "beneficiaryHistories"),
 							new InnerJoinRelationship("mbiParentBeneficiary", "beneficiaryId",
-									"MedicareBeneficiaryIdHistory",
-									"medicareBeneficiaryIdHistories")))
+									"MedicareBeneficiaryIdHistory", "medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
 			 * FIXME Many BeneficiaryHistory fields are marked transient (i.e. not saved to
@@ -502,7 +500,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
 
 			headerEntityClass.addField(headerField);
-
 			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
 					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
 			addGetterStatement(rifField, headerField, headerFieldGetter);
@@ -577,7 +574,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 						.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
 						.addMember("cascade", "$T.ALL", CascadeType.class).build());
 				childField.addAnnotation(
-						AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + "ASC").build());
+						AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + " ASC").build());
 				headerEntityClass.addField(childField.build());
 
 				MethodSpec childGetter = MethodSpec.methodBuilder("get" + capitalize(childFieldName))
