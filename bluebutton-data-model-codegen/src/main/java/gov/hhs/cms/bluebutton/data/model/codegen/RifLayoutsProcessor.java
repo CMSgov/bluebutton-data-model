@@ -55,6 +55,8 @@ import javax.tools.StandardLocation;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableSet;
@@ -571,8 +573,10 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				FieldSpec.Builder childField = FieldSpec.builder(childFieldType, childFieldName, Modifier.PRIVATE)
 						.initializer("new $T<>()", LinkedList.class);
 				childField.addAnnotation(AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", mappedBy)
-						.addMember("orphanRemoval", "$L", true).addMember("fetch", "$T.EAGER", FetchType.class)
+						.addMember("orphanRemoval", "$L", true)
 						.addMember("cascade", "$T.ALL", CascadeType.class).build());
+				childField.addAnnotation(AnnotationSpec.builder(LazyCollection.class)
+						.addMember("value", "$T.FALSE", LazyCollectionOption.class).build());
 				childField.addAnnotation(
 						AnnotationSpec.builder(OrderBy.class).addMember("value", "$S", orderBy + " ASC").build());
 				headerEntityClass.addField(childField.build());
