@@ -415,8 +415,8 @@ public final class MappingSpec {
 	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a
 	 *         parent of the header class
 	 */
-	public ClassName getParentEntity() {
-		return ClassName.get(packageName, parentEntity);
+	public String getParentEntity() {
+		return parentEntity;
 	}
 
 	/**
