@@ -185,9 +185,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 					.setHeaderEntityAdditionalDatabaseFields(
 							createDetailsForAdditionalDatabaseFields(Arrays.asList("hicnUnhashed")))
 					.setInnerJoinRelationship(Arrays.asList(
-							new InnerJoinRelationship("beneHistoryParentBeneficiary", "beneficiaryId",
+							new InnerJoinRelationship("beneficiaryId", "beneficiaryId",
 									"BeneficiaryHistory", "beneficiaryHistories"),
-							new InnerJoinRelationship("mbiParentBeneficiary", "beneficiaryId",
+							new InnerJoinRelationship("beneficiaryId", "beneficiaryId",
 									"MedicareBeneficiaryIdHistory", "medicareBeneficiaryIdHistories")))
 					.setHasLines(false));
 			/*
@@ -206,13 +206,13 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
 							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
-					.setParentRelationship("beneHistoryParentBeneficiary", "Beneficiary")
+					.setParentRelationship("beneficiaryId", "Beneficiary")
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
 					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
-					.setParentRelationship("mbiParentBeneficiary", "Beneficiary")
+					.setParentRelationship("beneficiaryId", "Beneficiary")
 					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -495,11 +495,27 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
 		// Create an Entity field with accessors for each RIF field.
 		for (int fieldIndex = 0; fieldIndex <= mappingSpec.calculateLastHeaderFieldIndex(); fieldIndex++) {
+
 			RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
 
-			FieldSpec headerField = FieldSpec
-					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
-					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
+			FieldSpec headerField = null;
+			if (mappingSpec.getHasParentRelationship()
+					&& rifField.getJavaFieldName().equals(mappingSpec.getJoinColumn())) {
+				headerField = FieldSpec
+						.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+						.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
+						.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
+								.addMember("name", "$S", "`" + mappingSpec.getJoinColumn() + "`")
+								.addMember("foreignKey", "@$T(name = $S)", ForeignKey.class,
+										String.format("%s_%s_to_%s", mappingSpec.getHeaderTable(),
+												mappingSpec.getJoinColumn(), mappingSpec.getParentEntity()))
+								.build())
+						.build();
+			} else {
+				headerField = FieldSpec
+						.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+						.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
+			}
 
 			headerEntityClass.addField(headerField);
 			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
@@ -586,32 +602,6 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 						.build();
 				headerEntityClass.addMethod(childGetter);
 			}
-		}
-
-		/*
-		 * Add the child-to-parent field and accessors to the child for an inner join
-		 * relationship to "Beneficiary"
-		 */
-		if (mappingSpec.getHasParentRelationship()) {
-			FieldSpec parentEntityField = FieldSpec
-					.builder(mappingSpec.getParentEntity(), mappingSpec.getJoinColumn(), Modifier.PRIVATE)
-					.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
-					.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
-							.addMember("name", "$S", "`" + mappingSpec.getJoinColumn() + "`")
-							.addMember("foreignKey", "@$T(name = $S)", ForeignKey.class, String.format("%s_%s_to_%s",
-									mappingSpec.getHeaderTable(), mappingSpec.getJoinColumn(), "Beneficiary"))
-							.build())
-					.build();
-			headerEntityClass.addField(parentEntityField);
-			MethodSpec parentEntityGetter = MethodSpec.methodBuilder(calculateGetterName(parentEntityField))
-					.addModifiers(Modifier.PUBLIC).addStatement("return $N", mappingSpec.getJoinColumn())
-					.returns(mappingSpec.getParentEntity()).build();
-			headerEntityClass.addMethod(parentEntityGetter);
-			MethodSpec.Builder parentEntitySetter = MethodSpec.methodBuilder(calculateSetterName(parentEntityField))
-					.addModifiers(Modifier.PUBLIC).returns(void.class)
-					.addParameter(mappingSpec.getParentEntity(), parentEntityField.name);
-			addSetterStatement(false, parentEntityField, parentEntitySetter);
-			headerEntityClass.addMethod(parentEntitySetter.build());
 		}
 
 		TypeSpec headerEntityFinal = headerEntityClass.build();
