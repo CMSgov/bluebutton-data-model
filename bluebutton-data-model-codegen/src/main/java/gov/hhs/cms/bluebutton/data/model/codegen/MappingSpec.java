@@ -29,8 +29,8 @@ import gov.hhs.cms.bluebutton.data.model.codegen.RifLayout.RifField;
  */
 public final class MappingSpec {
 	/*
-	 * Design Note: This class' fields are mutable to allow for the more
-	 * readable chained-setter style of construction.
+	 * Design Note: This class' fields are mutable to allow for the more readable
+	 * chained-setter style of construction.
 	 */
 
 	private String packageName;
@@ -44,8 +44,6 @@ public final class MappingSpec {
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
 	private List<InnerJoinRelationship> innerJoinRelationship;
-	private String joinColumn;
-	private String parentEntity;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -62,8 +60,7 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the Java package that the mapping is occurring for
-	 *         and in
+	 * @return the name of the Java package that the mapping is occurring for and in
 	 */
 	public String getPackageName() {
 		return packageName;
@@ -94,8 +91,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the {@link ClassName} of the JPA {@link Entity} class that will
-	 *         be used to store data from this RIF layout for the header fields
+	 * @return the {@link ClassName} of the JPA {@link Entity} class that will be
+	 *         used to store data from this RIF layout for the header fields
 	 */
 	public ClassName getHeaderEntity() {
 		return ClassName.get(packageName, headerEntity);
@@ -165,8 +162,8 @@ public final class MappingSpec {
 
 	/**
 	 * @return the name of the field in the {@link #getHeaderEntity()}
-	 *         {@link Entity} that should be used to store and refer to the
-	 *         child {@link #getLineEntity()} {@link Entity}s, if any
+	 *         {@link Entity} that should be used to store and refer to the child
+	 *         {@link #getLineEntity()} {@link Entity}s, if any
 	 */
 	public String getHeaderEntityLinesField() {
 		if (!hasLines)
@@ -175,8 +172,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return <code>true</code> if the RIF layout has child line fields that
-	 *         should be stored separately from its parent header fields,
+	 * @return <code>true</code> if the RIF layout has child line fields that should
+	 *         be stored separately from its parent header fields,
 	 *         <code>false</code> if not
 	 */
 	public boolean getHasLines() {
@@ -216,8 +213,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the JPA {@link Entity} class that will be used to
-	 *         store data from this RIF layout for the line fields, if any
+	 * @return the name of the JPA {@link Entity} class that will be used to store
+	 *         data from this RIF layout for the line fields, if any
 	 */
 	public ClassName getLineEntity() {
 		if (!hasLines)
@@ -226,8 +223,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the SQL table that the {@link #getLineEntity()}
-	 *         instances will be stored in, if any
+	 * @return the name of the SQL table that the {@link #getLineEntity()} instances
+	 *         will be stored in, if any
 	 */
 	public String getLineTable() {
 		if (!hasLines)
@@ -257,9 +254,9 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the field in the {@link #getLineEntity()}
-	 *         {@link Entity} that should be used to store and refer to the
-	 *         child {@link #getLineEntity()} {@link Entity}s, if any
+	 * @return the name of the field in the {@link #getLineEntity()} {@link Entity}
+	 *         that should be used to store and refer to the child
+	 *         {@link #getLineEntity()} {@link Entity}s, if any
 	 */
 	public String getLineEntityParentField() {
 		if (!hasLines)
@@ -268,16 +265,15 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the field in the {@link #getLineEntity()}
-	 *         {@link Entity} that should be used for the identifying line
-	 *         number, if any
+	 * @return the name of the field in the {@link #getLineEntity()} {@link Entity}
+	 *         that should be used for the identifying line number, if any
 	 */
 	public String getLineEntityLineNumberField() {
 		if (!hasLines)
 			throw new IllegalStateException();
 		return "lineNumber";
 	}
-	
+
 	/**
 	 * @return the fields in {@link #getHeaderEntity()} that should be marked as
 	 *         {@link Transient}
@@ -296,7 +292,7 @@ public final class MappingSpec {
 		this.headerEntityTransientFields = Arrays.asList(headerEntityTransientFields);
 		return this;
 	}
-	
+
 	/**
 	 * @return the fields in {@link #getHeaderEntity()} that should be marked as
 	 *         {@link Transient}
@@ -326,8 +322,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the {@link ClassName} for the class to be built that will contain
-	 *         CSV writing for the layout
+	 * @return the {@link ClassName} for the class to be built that will contain CSV
+	 *         writing for the layout
 	 */
 	public ClassName getCsvWriterClass() {
 		return ClassName.get(packageName, headerEntity + "CsvWriter");
@@ -381,42 +377,6 @@ public final class MappingSpec {
 	 */
 	public List<InnerJoinRelationship> getInnerJoinRelationship() {
 		return this.innerJoinRelationship;
-	}
-
-	/**
-	 * @param joinColumn
-	 *            the column to join on
-	 * @param parentEntity
-	 *            the parent entity of the current entity
-	 * @return this {@link MappingSpec} instance, for call-chaining purposes
-	 */
-	public MappingSpec setParentRelationship(String joinColumn, String parentEntity) {
-		this.joinColumn = joinColumn;
-		this.parentEntity = parentEntity;
-		return this;
-	}
-
-	/**
-	 * @return <code>true</code> if the RIF layout has a parentEnity and joinColumn
-	 *         <code>false</code> if not
-	 */
-	public boolean getHasParentRelationship() {
-		return parentEntity != null && joinColumn != null;
-	}
-
-	/**
-	 * @return the name of the column to join on
-	 */
-	public String getJoinColumn() {
-		return joinColumn;
-	}
-
-	/**
-	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a
-	 *         parent of the header class
-	 */
-	public String getParentEntity() {
-		return parentEntity;
 	}
 
 	/**

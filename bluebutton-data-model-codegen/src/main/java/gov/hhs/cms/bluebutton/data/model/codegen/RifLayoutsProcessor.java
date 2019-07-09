@@ -206,13 +206,11 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 							"nameSurname", "nameGiven", "nameMiddleInitial")
 					.setHeaderEntityAdditionalDatabaseFields(createDetailsForAdditionalDatabaseFields(
 							Arrays.asList("hicnUnhashed", "medicareBeneficiaryId")))
-					.setParentRelationship("beneficiaryId", "Beneficiary")
 					.setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
 					.setRifLayout(RifLayout.parse(spreadsheetWorkbook, annotation.medicareBeneficiaryIdSheet()))
 					.setHeaderEntity("MedicareBeneficiaryIdHistory").setHeaderTable("MedicareBeneficiaryIdHistory")
-					.setParentRelationship("beneficiaryId", "Beneficiary")
 					.setHeaderEntityIdField("medicareBeneficiaryIdKey").setHasLines(false));
 
 			mappingSpecs.add(new MappingSpec(annotatedPackage.getQualifiedName().toString())
@@ -498,25 +496,9 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 
 			RifField rifField = mappingSpec.getRifLayout().getRifFields().get(fieldIndex);
 
-			FieldSpec headerField = null;
-			if (mappingSpec.getHasParentRelationship()
-					&& rifField.getJavaFieldName().equals(mappingSpec.getJoinColumn())) {
-				headerField = FieldSpec
-						.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
-						.addAnnotation(AnnotationSpec.builder(ManyToOne.class).build())
-						.addAnnotation(AnnotationSpec.builder(JoinColumn.class)
-								.addMember("name", "$S", "`" + mappingSpec.getJoinColumn() + "`")
-								.addMember("foreignKey", "@$T(name = $S)", ForeignKey.class,
-										String.format("%s_%s_to_%s", mappingSpec.getHeaderTable(),
-												mappingSpec.getJoinColumn(), mappingSpec.getParentEntity()))
-								.build())
-						.build();
-			} else {
-				headerField = FieldSpec
-						.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
-						.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
-			}
-
+			FieldSpec headerField = FieldSpec
+					.builder(selectJavaFieldType(rifField), rifField.getJavaFieldName(), Modifier.PRIVATE)
+					.addAnnotations(createAnnotations(mappingSpec, rifField)).build();
 			headerEntityClass.addField(headerField);
 			MethodSpec.Builder headerFieldGetter = MethodSpec.methodBuilder(calculateGetterName(headerField))
 					.addModifiers(Modifier.PUBLIC).returns(selectJavaPropertyType(rifField));
@@ -589,7 +571,7 @@ public final class RifLayoutsProcessor extends AbstractProcessor {
 				FieldSpec.Builder childField = FieldSpec.builder(childFieldType, childFieldName, Modifier.PRIVATE)
 						.initializer("new $T<>()", LinkedList.class);
 				childField.addAnnotation(AnnotationSpec.builder(OneToMany.class).addMember("mappedBy", "$S", mappedBy)
-						.addMember("orphanRemoval", "$L", true)
+						.addMember("orphanRemoval", "$L", false)
 						.addMember("cascade", "$T.ALL", CascadeType.class).build());
 				childField.addAnnotation(AnnotationSpec.builder(LazyCollection.class)
 						.addMember("value", "$T.FALSE", LazyCollectionOption.class).build());
