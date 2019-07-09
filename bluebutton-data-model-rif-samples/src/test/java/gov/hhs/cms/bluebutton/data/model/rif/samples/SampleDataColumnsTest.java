@@ -65,15 +65,6 @@ public final class SampleDataColumnsTest {
 	}
 
 	/**
-	 * Checks our code's columns against the
-	 * {@link StaticRifResourceGroup#SAMPLE_MCT} data file headers.
-	 */
-	@Test
-	public void verifySampleMCTColumns() {
-		verifyColumns(StaticRifResourceGroup.SAMPLE_MCT);
-	}
-
-	/**
 	 * Verifies that our code's column {@link Enum}s match the headers in the
 	 * specified sample files.
 	 * 
