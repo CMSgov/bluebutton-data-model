@@ -44,8 +44,6 @@ public final class MappingSpec {
 	private List<String> headerEntityTransientFields;
 	private List<RifField> headerEntityAdditionalDatabaseFields;
 	private List<InnerJoinRelationship> innerJoinRelationship;
-	private String joinColumn;
-	private String parentEntity;
 
 	/**
 	 * Constructs a new {@link MappingSpec} instance.
@@ -381,42 +379,6 @@ public final class MappingSpec {
 	 */
 	public List<InnerJoinRelationship> getInnerJoinRelationship() {
 		return this.innerJoinRelationship;
-	}
-
-	/**
-	 * @param joinColumn
-	 *            the column to join on
-	 * @param parentEntity
-	 *            the parent entity of the current entity
-	 * @return this {@link MappingSpec} instance, for call-chaining purposes
-	 */
-	public MappingSpec setParentRelationship(String joinColumn, String parentEntity) {
-		this.joinColumn = joinColumn;
-		this.parentEntity = parentEntity;
-		return this;
-	}
-
-	/**
-	 * @return <code>true</code> if the RIF layout has a parentEnity and joinColumn
-	 *         <code>false</code> if not
-	 */
-	public boolean getHasParentRelationship() {
-		return parentEntity != null && joinColumn != null;
-	}
-
-	/**
-	 * @return the name of the column to join on
-	 */
-	public String getJoinColumn() {
-		return joinColumn;
-	}
-
-	/**
-	 * @return the {@link ClassName} of the JPA {@link Entity} class that is a
-	 *         parent of the header class
-	 */
-	public String getParentEntity() {
-		return parentEntity;
 	}
 
 	/**

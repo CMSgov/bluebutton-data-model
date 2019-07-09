@@ -2,15 +2,16 @@
  * Alters the BeneficiariesHistory and MedicareBeneficiaryIdHistory tables to add foreign
  * keys to Beneficiary.
  * 
- * See:
- * * https://jira.cms.gov/browse/BLUEBUTTON-620
+ * See: https://jira.cms.gov/browse/BLUEBUTTON-865
  */
 
--- Move all BeneificariesHistory entries that don't point to a valid Beneficiaries record to
--- a separate table (we could delete it, but people who delete data are bad people). Really,
--- we should not have ever received these BeneficiariesHistory entries from the CCW in the
--- first place: we can't use them, and they prevent us from having a foreign key (and JPA 
--- relationship) on this table.
+/*
+ * Move all BeneificariesHistory entries that don't point to a valid Beneficiaries record to
+ * a separate table (we could delete it, but people who delete data are bad people). Really,
+ * we should not have ever received these BeneficiariesHistory entries from the CCW in the
+ * first place: we can't use them, and they prevent us from having a foreign key (and JPA 
+ * relationship) on this table.
+ */
 create table "BeneficiariesHistoryInvalidBeneficiaries" (
   "beneficiaryHistoryId" bigint not null,
   "beneficiaryId" varchar(15) not null,
@@ -40,12 +41,12 @@ delete
   from "BeneficiariesHistory"
   where not exists (select "beneficiaryId"
   					from "Beneficiaries"
-  					where "BeneficiariesHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId")
+  					where "BeneficiariesHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId");
 
 alter table "BeneficiariesHistory" 
-   add constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary" 
-   foreign key ("beneficiaryId") 
-   references "Beneficiaries";
+  add constraint "BeneficiariesHistory_beneficiaryId_to_Beneficiary" 
+  foreign key ("beneficiaryId") 
+  references "Beneficiaries";
    
 -- Move all MedicareBeneficiaryIdHistory entries that don't point to a valid Beneficiaries 
 -- record to a separate table, just as we did with BeneficiariesHistory entries above.
@@ -96,13 +97,10 @@ delete
   from "MedicareBeneficiaryIdHistory"
   where not exists (select "beneficiaryId"
   					from "Beneficiaries"
-  					where CAST("MedicareBeneficiaryIdHistory"."beneficiaryId" as varchar(15)) = "Beneficiaries"."beneficiaryId")
-  
--- FIXME: Cannot add this FK currently as the data types between
--- MedicareBeneficiaryIdHistory.beneficiaryId and Beneficiaries.beneficiaryId are different
-/*
- * alter table "MedicareBeneficiaryIdHistory" 
- *   add constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary" 
- *   foreign key ("beneficiaryId") 
- *   references "Beneficiaries";
- */
+  					where "MedicareBeneficiaryIdHistory"."beneficiaryId" = "Beneficiaries"."beneficiaryId");
+  					 
+alter table "MedicareBeneficiaryIdHistory" 
+   add constraint "MedicareBeneficiaryIdHistory_beneficiaryId_to_Beneficiary" 
+   foreign key ("beneficiaryId") 
+   references "Beneficiaries";
+ 
