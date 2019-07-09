@@ -60,8 +60,7 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the name of the Java package that the mapping is occurring for
-	 * and in
+	 * @return the name of the Java package that the mapping is occurring for and in
 	 */
 	public String getPackageName() {
 		return packageName;
@@ -92,8 +91,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return the {@link ClassName} of the JPA {@link Entity} class that will
-	 * 		   be used to store data from this RIF layout for the header fields
+	 * @return the {@link ClassName} of the JPA {@link Entity} class that will be
+	 *         used to store data from this RIF layout for the header fields
 	 */
 	public ClassName getHeaderEntity() {
 		return ClassName.get(packageName, headerEntity);
@@ -173,8 +172,8 @@ public final class MappingSpec {
 	}
 
 	/**
-	 * @return <code>true</code> if the RIF layout has child line fields that
-	 * 		   should be stored separately from its parent header fields,
+	 * @return <code>true</code> if the RIF layout has child line fields that should
+	 *         be stored separately from its parent header fields,
 	 *         <code>false</code> if not
 	 */
 	public boolean getHasLines() {
